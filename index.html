@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Inventory</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --color-bg: #f7f6f2;
+      --color-surface: #f9f8f5;
+      --color-surface-2: #fbfbf9;
+      --color-surface-offset: #edeae5;
+      --color-border: #d4d1ca;
+      --color-divider: #dcd9d5;
+      --color-text: #28251d;
+      --color-text-muted: #6d6b66;
+      --color-text-faint: #a5a39c;
+      --color-primary: #01696f;
+      --color-primary-hover: #0c4e54;
+      --color-primary-highlight: #cedcd8;
+      --color-success: #437a22;
+      --color-warning: #964219;
+      --color-error: #a13544;
+      --color-blue: #006494;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px rgba(24,24,24,.06);
+      --shadow-md: 0 10px 28px rgba(24,24,24,.08);
+      --shadow-lg: 0 18px 40px rgba(24,24,24,.14);
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font-body: 'Satoshi', 'Segoe UI', sans-serif;
+      --header-h: 5.25rem;
+      --filters-h: 11rem;
+      --carousel-h: 8.5rem;
+      --carousel-collapsed-h: 3.75rem;
+    }
+
+    [data-theme="dark"] {
+      --color-bg: #171614;
+      --color-surface: #1c1b19;
+      --color-surface-2: #201f1d;
+      --color-surface-offset: #2a2826;
+      --color-border: #393836;
+      --color-divider: #2d2c2a;
+      --color-text: #ece9e3;
+      --color-text-muted: #b9b3aa;
+      --color-text-faint: #8e887f;
+      --color-primary: #4f98a3;
+      --color-primary-hover: #227f8b;
+      --color-primary-highlight: #313b3b;
+      --color-success: #6daa45;
+      --color-warning: #fdab43;
+      --color-error: #dd6974;
+      --color-blue: #76b7df;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.24);
+      --shadow-md: 0 10px 28px rgba(0,0,0,.28);
+      --shadow-lg: 0 18px 40px rgba(0,0,0,.4);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.45;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    img { display: block; max-width: 100%; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    .app { min-height: 100dvh; display: grid; grid-template-rows: auto auto auto 1fr; }
+
+    .sticky {
+      position: sticky; z-index: 25; backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .topbar {
+      top: 0;
+      min-height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      z-index: 40;
+      flex-wrap: wrap;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .header-center {
+      justify-content: center;
+      flex: 1 1 320px;
+    }
+
+    .header-left {
+      flex: 0 1 auto;
+    }
+
+    .header-right {
+      flex: 0 1 auto;
+      justify-content: flex-end;
+    }
+
+    .filters {
+      top: var(--header-h);
+      min-height: var(--filters-h);
+      padding: var(--space-4) var(--space-5);
+      z-index: 38;
+    }
+
+    .carousel-wrap {
+      top: calc(var(--header-h) + var(--filters-h));
+      min-height: var(--carousel-h);
+      padding: var(--space-3) var(--space-5) var(--space-4);
+      transition: min-height var(--transition);
+      z-index: 37;
+    }
+
+    .carousel-wrap.collapsed {
+      min-height: var(--carousel-collapsed-h);
+    }
+
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .logo { width: 34px; height: 34px; color: var(--color-primary); }
+    .title { font-size: var(--text-xl); font-weight: 700; letter-spacing: -.03em; }
+
+    .theme-btn, .cart-btn, .nav-btn, .action-btn, .secondary-btn, .danger-btn, .toggle-btn {
+      min-height: 44px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      color: var(--color-text);
+      padding: 0 var(--space-4);
+      transition: all var(--transition);
+    }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      min-width: 108px;
+    }
+
+    .theme-btn svg {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .cart-btn, .action-btn {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .cart-btn:hover, .action-btn:hover { background: var(--color-primary-hover); }
+    .secondary-btn:hover, .theme-btn:hover, .nav-btn:hover, .danger-btn:hover, .toggle-btn:hover { background: var(--color-surface-offset); }
+    .danger-btn { background: color-mix(in srgb, var(--color-error) 10%, var(--color-surface-2)); }
+
+    .header-center .nav-btn {
+      min-width: 130px;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 88px minmax(150px, 1fr) minmax(150px, 1fr) minmax(150px, 1fr) 88px 120px 120px;
+      gap: var(--space-3);
+      align-items: end;
+    }
+
+    .filters-grid.sold {
+      grid-template-columns: 88px minmax(140px, 1fr) minmax(140px, 1fr) minmax(140px, 1fr) 88px 118px 118px 118px 118px;
+    }
+
+    .field {
+      display: grid;
+      gap: var(--space-1);
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    .field input {
+      min-height: 44px;
+      width: 100%;
+      min-width: 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      padding: 0 var(--space-3);
+      color: var(--color-text);
+    }
+
+    .field input:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    .filters-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-4);
+      margin-top: var(--space-3);
+      margin-bottom: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      font-size: var(--text-sm);
+      border-radius: var(--radius-full);
+      padding: .55rem .85rem;
+      background: var(--color-primary-highlight);
+      color: var(--color-text);
+    }
+
+    .status-chip::before {
+      content: '';
+      width: .6rem;
+      height: .6rem;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    .carousel-header {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .carousel-panel {
+      overflow: hidden;
+    }
+
+    .carousel-panel.hidden {
+      display: none;
+    }
+
+    .carousel {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(110px, 140px));
+      gap: var(--space-3);
+      overflow-x: auto;
+      padding-bottom: var(--space-1);
+      align-items: start;
+      justify-content: center;
+    }
+
+    .carousel-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      min-width: 110px;
+      max-width: 140px;
+      margin-inline: auto;
+    }
+
+    .carousel-card button {
+      width: 100%;
+      border: 0;
+      background: none;
+      padding: 0;
+      text-align: center;
+      color: inherit;
+    }
+
+    .carousel-image {
+      position: relative;
+      aspect-ratio: 4/5;
+      background: var(--color-surface-offset);
+      overflow: hidden;
+      max-height: 145px;
+    }
+
+    .carousel-image img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: contain;
+      object-position: center;
+      margin: 0;
+      transition: transform var(--transition);
+    }
+
+    .carousel-card:hover img {
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .carousel-meta {
+      padding: var(--space-2);
+      font-size: .7rem;
+      line-height: 1.2;
+      color: var(--color-text);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .inventory {
+      min-height: 0;
+      padding: var(--space-4) var(--space-5);
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .inventory-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .count { font-weight: 700; text-align: right; }
+
+    .table-shell {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .table-head, .table-row {
+      display: grid;
+      align-items: center;
+      gap: var(--space-3);
+      padding: .85rem 1rem;
+    }
+
+    .for-sale-cols { grid-template-columns: 46px 96px minmax(150px,1.15fr) minmax(170px,1.1fr) minmax(150px,1fr) 100px 100px; }
+    .sold-cols { grid-template-columns: 46px 96px minmax(150px,1.1fr) minmax(170px,1.1fr) minmax(150px,1fr) 100px 100px 110px; }
+
+    .table-head {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: var(--color-surface-2);
+      border-bottom: 1px solid var(--color-divider);
+      font-size: var(--text-sm);
+      font-weight: 700;
+    }
+
+    .table-body {
+      overflow: auto;
+      max-height: calc(100dvh - var(--header-h) - var(--filters-h) - var(--carousel-h) - 10rem);
+    }
+
+    .table-body.carousel-collapsed {
+      max-height: calc(100dvh - var(--header-h) - var(--filters-h) - var(--carousel-collapsed-h) - 10rem);
+    }
+
+    .table-row {
+      border-bottom: 1px solid var(--color-divider);
+      background: var(--color-surface);
+    }
+
+    .table-row:hover {
+      background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+    }
+
+    .table-row:last-child { border-bottom: 0; }
+
+    .sortable {
+      background: none;
+      border: 0;
+      padding: 0;
+      display: inline-flex;
+      gap: .35rem;
+      align-items: center;
+      font-weight: 700;
+      color: inherit;
+    }
+
+    .sort-ind { color: var(--color-text-faint); font-size: .85em; }
+    .mono { font-variant-numeric: tabular-nums lining-nums; }
+    .muted { color: var(--color-text-muted); }
+    .checkbox { width: 18px; height: 18px; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(18,18,18,.48);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+      z-index: 100;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(980px, 100%);
+      max-height: 92dvh;
+      overflow: auto;
+      background: var(--color-surface);
+      border-radius: 1.2rem;
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-5);
+      position: relative;
+      z-index: 101;
+      margin-inline: auto;
+    }
+
+    .modal.small { width: min(420px, 100%); }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .modal-title { font-size: var(--text-lg); font-weight: 700; }
+
+    .close-btn {
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 330px) 1fr;
+      gap: var(--space-5);
+      align-items: start;
+    }
+
+    .detail-card {
+      display: grid;
+      gap: var(--space-3);
+      justify-items: center;
+      text-align: center;
+    }
+
+    .detail-image-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 4/5;
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .detail-image-wrap img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: contain;
+      object-position: center;
+      margin: 0;
+    }
+
+    .detail-meta { display: grid; gap: var(--space-2); }
+
+    .detail-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .detail-meta strong { display: block; }
+
+    .disclaimer {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      background: var(--color-surface-2);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+    }
+
+    .cart-list { display: grid; gap: var(--space-3); }
+
+    .cart-row {
+      display: grid;
+      grid-template-columns: 1.7fr .7fr .75fr auto;
+      gap: var(--space-3);
+      align-items: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3);
+    }
+
+    .cart-row input, .cart-adjust input, .pin-input {
+      min-height: 42px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      padding: 0 .75rem;
+      color: var(--color-text);
+    }
+
+    .cart-summary {
+      margin-top: var(--space-4);
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .cart-adjust {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: var(--space-3);
+      align-items: center;
+    }
+
+    .totals {
+      display: grid;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(110px, 1fr));
+      gap: var(--space-3);
+    }
+
+    .qr-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3);
+      background: var(--color-surface);
+      text-align: center;
+    }
+
+    .qr-card img {
+      width: 100%;
+      max-width: 130px;
+      margin-inline: auto;
+      aspect-ratio: 1/1;
+      object-fit: contain;
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-md);
+    }
+
+    .empty {
+      padding: var(--space-8);
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+
+    .page-label { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+    @media (max-width: 1300px) {
+      :root {
+        --filters-h: 15.5rem;
+        --carousel-h: 8rem;
+      }
+
+      .filters-grid, .filters-grid.sold {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .carousel {
+        grid-template-columns: repeat(5, minmax(110px, 140px));
+        justify-content: start;
+      }
+
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --header-h: 8.5rem;
+      }
+
+      .topbar {
+        justify-content: center;
+      }
+
+      .header-left, .header-center, .header-right {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --header-h: 10.5rem;
+        --filters-h: 24rem;
+        --carousel-h: 7.75rem;
+        --carousel-collapsed-h: 4rem;
+      }
+
+      .topbar, .filters, .carousel-wrap, .inventory {
+        padding-inline: var(--space-4);
+      }
+
+      .filters-grid, .filters-grid.sold { grid-template-columns: 1fr 1fr; }
+      .table-head, .table-row { width: max-content; min-width: 100%; }
+
+      .table-body {
+        max-height: calc(100dvh - var(--header-h) - var(--filters-h) - var(--carousel-h) - 11rem);
+      }
+
+      .table-body.carousel-collapsed {
+        max-height: calc(100dvh - var(--header-h) - var(--filters-h) - var(--carousel-collapsed-h) - 11rem);
+      }
+
+      .inventory-head {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .cart-row { grid-template-columns: 1fr; }
+      .cart-adjust { grid-template-columns: 1fr; }
+      .qr-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="sr-only">Skip to content</a>
+
+  <div class="app">
+    <header class="topbar sticky">
+      <div class="header-left">
+        <div class="brand">
+          <svg class="logo" viewBox="0 0 48 48" fill="none" aria-label="Card Inventory logo">
+            <rect x="8" y="10" width="23" height="28" rx="4" stroke="currentColor" stroke-width="3"></rect>
+            <rect x="18" y="6" width="22" height="28" rx="4" stroke="currentColor" stroke-width="3" opacity=".65"></rect>
+          </svg>
+          <div class="title">Card Inventory</div>
+        </div>
+      </div>
+
+      <nav class="header-center" aria-label="Inventory views">
+        <button class="nav-btn" data-view-link="for-sale">For Sale Items</button>
+        <button class="nav-btn" data-view-link="keep">Keep Items</button>
+        <button class="nav-btn" data-view-link="sold">Sold Items</button>
+      </nav>
+
+      <div class="header-right">
+        <button class="theme-btn" data-theme-toggle aria-label="Switch theme">
+          <span class="theme-icon" id="themeIcon" aria-hidden="true"></span>
+          <span id="themeLabel">Theme</span>
+        </button>
+        <button class="cart-btn" id="openCartBtn">View Cart (<span id="cartCount">0</span>)</button>
+      </div>
+    </header>
+
+    <section class="filters sticky" aria-labelledby="filtersHeading">
+      <div class="filters-row">
+        <div>
+          <div id="filtersHeading" class="modal-title">Search and filters</div>
+          <div class="page-label" id="filterHint">Showing items marked For Sale</div>
+        </div>
+        <div class="filter-actions">
+          <div class="status-chip" id="statusChip">For Sale</div>
+          <button class="secondary-btn" id="clearFiltersBtn" type="button">Clear Filters</button>
+        </div>
+      </div>
+      <div class="filters-grid" id="filtersGrid"></div>
+    </section>
+
+    <section class="carousel-wrap sticky" id="carouselWrap" aria-label="Card image carousel">
+      <div class="carousel-header">
+        <button class="toggle-btn" id="toggleCarouselBtn" type="button" aria-expanded="true">Show/Hide Card Images</button>
+      </div>
+      <div class="carousel-panel" id="carouselPanel">
+        <div class="carousel" id="carousel"></div>
+      </div>
+    </section>
+
+    <main class="inventory" id="main">
+      <div class="inventory-head">
+        <div style="display:flex; gap:.75rem; flex-wrap:wrap;">
+          <button class="action-btn" id="tableActionBtn">Add selected to cart</button>
+        </div>
+        <div class="count" id="itemCount">0 items shown</div>
+      </div>
+
+      <section class="table-shell" aria-label="Inventory table">
+        <div class="table-head" id="tableHead"></div>
+        <div class="table-body" id="tableBody"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="itemModalBackdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">Card details</div>
+        <button class="close-btn" data-close="itemModalBackdrop" aria-label="Close card details">×</button>
+      </div>
+      <div class="detail-grid" id="itemModalContent"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="cartModalBackdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">Shopping Cart</div>
+        <button class="close-btn" data-close="cartModalBackdrop" aria-label="Close cart">×</button>
+      </div>
+      <div id="cartContent"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="pinModalBackdrop" aria-hidden="true">
+    <div class="modal small">
+      <div class="modal-head">
+        <div class="modal-title">Admin PIN required</div>
+        <button class="close-btn" data-close="pinModalBackdrop" aria-label="Close PIN dialog">×</button>
+      </div>
+      <div class="detail-card">
+        <div class="page-label" id="pinPromptText">Enter the Admin PIN to continue.</div>
+        <input class="pin-input" id="pinInput" type="password" inputmode="numeric" placeholder="Enter PIN" maxlength="10" />
+        <div id="pinError" class="muted"></div>
+        <button class="action-btn" id="pinSubmitBtn">Unlock view</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const APP = {
+      adminPin: '4321',
+      currentView: 'for-sale',
+      pendingView: null,
+      unlocked: { keep: false, sold: false },
+      sort: { key: 'Desired Price', direction: 'desc', custom: false },
+      filters: {},
+      selected: new Set(),
+      cart: [],
+      cartItemOverrides: {},
+      cartGlobalOverride: '',
+      manualTheme: null,
+      imageBasePath: 'card_images/',
+      carouselExpanded: true,
+      visibleCarouselIds: []
+    };
+
+    let DATA = [];
+    const DATA_URL = './cards_data.json';
+
+    async function loadData() {
+      try {
+        const response = await fetch(DATA_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        const text = await response.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch (err) {
+          throw new Error(`Invalid JSON syntax. ${err.message}`);
+        }
+        if (!Array.isArray(parsed)) throw new Error('JSON root must be an array like [ ... ]');
+        DATA = parsed;
+        renderAll();
+      } catch (err) {
+        els.tableBody.innerHTML = `
+          <div class="empty" style="padding:2rem; color:#b00020;">
+            <strong>Could not load cards_data.json</strong><br><br>
+            Check that <code>./cards_data.json</code> is in the same folder as this HTML file,
+            that the file name is exact, and that the JSON starts with an array like <code>[ ... ]</code>.<br><br>
+            <strong>Data URL:</strong> ${DATA_URL}<br>
+            <strong>Page URL:</strong> ${location.href}<br>
+            <strong>Protocol:</strong> ${location.protocol}<br>
+            <strong>Error:</strong> ${err.message}
+          </div>`;
+        els.itemCount.textContent = '0 items shown';
+        const carousel = document.getElementById('carousel');
+        if (carousel) carousel.innerHTML = '<div class=\"empty\">No images to show.</div>';
+      }
+    }
+
+>
