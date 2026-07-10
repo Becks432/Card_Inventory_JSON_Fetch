@@ -680,22 +680,6 @@
       .cart-adjust { grid-template-columns: 1fr; }
       .qr-grid { grid-template-columns: 1fr; }
     }
-  
-    @keyframes marqueeScroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-    #marqueeTrack.scrolling {
-      animation: marqueeScroll 40s linear infinite;
-    }
-    #marqueeTrack img {
-      height: 70vh;
-      max-width: 40vw;
-      object-fit: contain;
-      border-radius: var(--radius-lg);
-      flex-shrink: 0;
-      background: var(--color-surface-offset);
-    }
   </style>
 </head>
 <body>
@@ -720,7 +704,6 @@
       </nav>
 
       <div class="header-right">
-        <button class="secondary-btn" id="openMarqueeBtn" type="button">Image Marquee</button>
         <button class="theme-btn" data-theme-toggle aria-label="Switch theme">
           <span class="theme-icon" id="themeIcon" aria-hidden="true"></span>
           <span id="themeLabel">Theme</span>
@@ -802,11 +785,7 @@
     </div>
   </div>
 
-    <div id="marqueeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:999;overflow:hidden;cursor:pointer;">
-    <div id="marqueeTrack" style="display:flex;gap:1.5rem;align-items:center;height:100%;will-change:transform;"></div>
-  </div>
-
-<script>
+  <script>
     const APP = {
       adminPin: '4321',
       currentView: 'for-sale',
@@ -10431,42 +10410,6 @@
       const id = getImageId(item) || '0';
       return `${APP.imageBasePath}${id}.jpg`;
     }
-
-    const marqueeOverlay = document.getElementById('marqueeOverlay');
-    const marqueeTrack = document.getElementById('marqueeTrack');
-    const openMarqueeBtn = document.getElementById('openMarqueeBtn');
-
-    function buildMarqueeImages() {
-      const seen = new Set();
-      const paths = [];
-      DATA.forEach(item => {
-        const path = getImagePath(item);
-        if (!seen.has(path)) {
-          seen.add(path);
-          paths.push(path);
-        }
-      });
-      const doubled = paths.concat(paths);
-      marqueeTrack.innerHTML = doubled.map(p =>
-        `<img src="${escapeHtml(p)}" onerror="this.onerror=null;this.src='${APP.imageBasePath}0.jpg';">`
-      ).join('');
-    }
-
-    function openMarquee() {
-      buildMarqueeImages();
-      marqueeOverlay.style.display = 'block';
-      requestAnimationFrame(() => marqueeTrack.classList.add('scrolling'));
-    }
-
-    function closeMarquee() {
-      marqueeOverlay.style.display = 'none';
-      marqueeTrack.classList.remove('scrolling');
-      marqueeTrack.innerHTML = '';
-    }
-
-    openMarqueeBtn.addEventListener('click', openMarquee);
-    marqueeOverlay.addEventListener('click', closeMarquee);
-
 
     function themeIconSvg(theme) {
       if (theme === 'dark') {
